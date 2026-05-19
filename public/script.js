@@ -12,14 +12,17 @@ function joinRoom() {
         return;
     }
 
-    socket.emit("joinRoom", currentRoom);
+    socket.emit("joinRoom", {
+        room: currentRoom,
+        user: currentUser
+    });
 
     document.getElementById("chat").style.display = "block";
 }
 
 function sendMessage() {
     const input = document.getElementById("messageInput");
-    const message = input.value;
+    const message = input.value.trim();
 
     if (!message) return;
 
@@ -37,6 +40,30 @@ socket.on("message", (data) => {
 
     const div = document.createElement("div");
     div.textContent = `${data.user}: ${data.message}`;
+
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+});
+
+socket.on("chatHistory", (history) => {
+    const messages = document.getElementById("messages");
+    messages.innerHTML = "";
+
+    history.forEach((msg) => {
+        const div = document.createElement("div");
+        div.textContent = `${msg.user}: ${msg.message}`;
+        messages.appendChild(div);
+    });
+
+    messages.scrollTop = messages.scrollHeight;
+});
+
+socket.on("status", (text) => {
+    const messages = document.getElementById("messages");
+
+    const div = document.createElement("div");
+    div.textContent = text;
+    div.style.color = "green";
 
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
